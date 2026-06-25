@@ -1,0 +1,861 @@
+{{!
+    @template local_courses/courses
+    All Courses page with filter tabs, cards, skeleton, completion popup, suggestions popup.
+}}
+
+<style>
+/* ══════════════════════════════════════════════
+   LOCAL COURSES — COMPLETE STYLESHEET
+   ══════════════════════════════════════════════ */
+
+.lc-wrap { padding: 28px 32px; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+/* ── Page title ── */
+.lc-title { font-size: 22px; font-weight: 700; color: #1a2a4a; margin-bottom: 20px; }
+
+/* ── Filter tabs ── */
+.lc-tabs { display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; }
+
+.lc-tab {
+    padding: 7px 20px;
+    border-radius: 50px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    color: #555;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+}
+.lc-tab:hover { border-color: #1a2a4a; color: #1a2a4a; }
+.lc-tab.active {
+    background: #1a2a4a;
+    color: #fff;
+    border-color: #1a2a4a;
+}
+
+/* ── Course grid ── */
+.lc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 8px;
+}
+
+/* ── Course card ── */
+.lc-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #eef0f4;
+    padding: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    transition: box-shadow 0.2s;
+}
+.lc-card:hover { box-shadow: 0 6px 24px rgba(0,0,0,0.09); }
+
+/* Card header row */
+.lc-card-header { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+
+.lc-card-title { font-size: 16px; font-weight: 600; color: #1a2a4a; line-height: 1.3; }
+
+/* Status badges */
+.lc-badge {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 50px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.badge-ongoing    { color: #e07b00; background: #fff4e0; }
+.badge-notstarted { color: #e03c3c; background: #fff0f0; }
+.badge-completed  { color: #1faa6b; background: #eafaf3; }
+
+/* Instructor */
+.lc-instructor { font-size: 13px; color: #8a8f98; }
+
+/* Meta row (lessons + duration) */
+.lc-meta { display: flex; align-items: center; gap: 16px; }
+.lc-meta-item { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #555; }
+.lc-meta-item i { font-size: 15px; color: #1a2a4a; }
+
+/* ── Segment progress bar ── */
+.lc-segments { display: flex; gap: 3px; align-items: center; }
+.lc-segment {
+    flex: 1;
+    height: 14px;
+    border-radius: 3px;
+    background: #e5e7eb;
+}
+.lc-segment.filled-ongoing   { background: #e07b00; }
+.lc-segment.filled-completed { background: #4db89a; }
+
+.lc-progress-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #555;
+    margin-top: 2px;
+}
+.lc-progress-pct { font-weight: 600; color: #1a2a4a; }
+
+/* ── View button ── */
+.lc-btn-view {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #1a2a4a;
+    color: #fff;
+    padding: 8px 18px 8px 20px;
+    border-radius: 50px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s;
+    width: fit-content;
+    height: 40px;
+    justify-content: center;
+}
+.lc-btn-view:hover { background: #263660; color: #fff; }
+.lc-btn-view .btn-circle {
+    width: 26px; height: 26px;
+    background: rgba(255,255,255,0.18);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+}
+.lc-btn-view i { font-size: 16px; }
+
+/* ── Empty state ── */
+.lc-empty { text-align: center; padding: 60px 20px; color: #aaa; }
+.lc-empty i { font-size: 48px; display: block; margin-bottom: 12px; }
+
+/* ══════════════════════════════════════════════
+   SKELETON LOADER
+   ══════════════════════════════════════════════ */
+.lc-skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 8px;
+}
+
+.lc-skeleton-card {
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid #eef0f4;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+@keyframes lc-shimmer {
+    0%   { background-position: -600px 0; }
+    100% { background-position: 600px 0; }
+}
+
+.lc-skel {
+    border-radius: 6px;
+    background: linear-gradient(90deg, #e8eaed 25%, #f5f5f5 50%, #e8eaed 75%);
+    background-size: 600px 100%;
+    animation: lc-shimmer 1.4s infinite linear;
+}
+
+.lc-skel-title    { height: 18px; width: 65%; }
+.lc-skel-badge    { height: 18px; width: 22%; border-radius: 50px; }
+.lc-skel-instr    { height: 14px; width: 80%; }
+.lc-skel-meta     { height: 14px; width: 55%; }
+.lc-skel-bar      { height: 14px; width: 100%; border-radius: 3px; }
+.lc-skel-btn      { height: 38px; width: 36%; border-radius: 50px; }
+
+/* ══════════════════════════════════════════════
+   MODAL OVERLAY
+   ══════════════════════════════════════════════ */
+.lc-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    z-index: 9998;
+    align-items: center;
+    justify-content: center;
+}
+.lc-overlay.open { display: flex; }
+
+.lc-modal {
+    background: #fff;
+    border-radius: 20px;
+    padding: 32px 28px 24px;
+    width: 100%;
+    max-width: 480px;
+    position: relative;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    animation: lc-modal-in 0.2s ease;
+    max-height: 90vh;
+    overflow-y: auto;
+}
+@keyframes lc-modal-in {
+    from { opacity:0; transform: translateY(20px); }
+    to   { opacity:1; transform: translateY(0); }
+}
+
+.lc-modal-close {
+    position: absolute;
+    top: 14px; right: 16px;
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: #555;
+}
+.lc-modal-close:hover { background: #f7f8fa; }
+
+.lc-modal-title { font-size: 16px; font-weight: 600; color: #1a2a4a; margin-bottom: 20px; }
+
+/* ══════════════════════════════════════════════
+   COMPLETION POPUP
+   ══════════════════════════════════════════════ */
+.lc-completion-badge {
+    text-align: center;
+    margin-bottom: 18px;
+}
+.lc-completion-badge .badge-img {
+    width: 140px;
+    height: 140px;
+    margin: 0 auto 4px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+/* SVG trophy/badge illustration */
+.lc-trophy-svg { width: 140px; height: 140px; }
+
+.lc-congrats-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #1a2a4a;
+    text-align: center;
+    margin-bottom: 8px;
+}
+.lc-congrats-text {
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+/* Score gauges */
+.lc-scores { display: flex; gap: 16px; margin-bottom: 24px; }
+.lc-score-box {
+    flex: 1;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    padding: 16px 12px;
+    text-align: center;
+}
+.lc-score-label { font-size: 13px; font-weight: 600; color: #1a2a4a; margin-bottom: 10px; }
+
+/* SVG arc gauge */
+.lc-gauge { width: 90px; height: 55px; margin: 0 auto 4px; }
+.lc-gauge-value { font-size: 20px; font-weight: 700; }
+.gauge-teal   { color: #4db89a; }
+.gauge-orange { color: #e07b00; }
+
+/* Popup action buttons */
+.lc-popup-actions { display: flex; gap: 12px; }
+.lc-btn-secondary {
+    flex: 1;
+    padding: 12px;
+    border-radius: 50px;
+    border: 1px solid #e5e7eb;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s;
+    height: 40px;
+    align-items: center;
+    justify-content: center;
+    display: flex;
+}
+.lc-btn-secondary:hover { background: #f7f8fa; }
+.lc-btn-primary {
+    flex: 1;
+    padding: 12px;
+    border-radius: 50px;
+    border: none;
+    background: #1a2a4a;
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    cursor: pointer;
+    text-align: center;
+    transition: background 0.15s;
+}
+.lc-btn-primary:hover { background: #263660; }
+
+/* Confetti dots */
+.lc-confetti {
+    position: relative;
+    overflow: hidden;
+}
+.confetti-dot {
+    position: absolute;
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    opacity: 0.7;
+}
+
+/* ══════════════════════════════════════════════
+   IMPROVEMENT SUGGESTIONS POPUP
+   ══════════════════════════════════════════════ */
+.lc-suggestions-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1a2a4a;
+    margin-bottom: 16px;
+}
+.lc-suggestion-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+.lc-suggestion-card {
+    border: 1px solid #eef0f4;
+    border-radius: 12px;
+    padding: 14px;
+}
+.lc-suggestion-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+.lc-suggestion-name { font-size: 13px; font-weight: 600; color: #1a2a4a; }
+.lc-suggestion-tag {
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 50px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+.tag-mastery    { background: #eafaf3; color: #1faa6b; }
+.tag-efficiency { background: #fff4e0; color: #e07b00; }
+.tag-recommended{ background: #eafaf3; color: #1faa6b; }
+.lc-suggestion-desc { font-size: 12px; color: #666; line-height: 1.5; }
+</style>
+
+<div class="lc-wrap">
+
+    <h1 class="lc-title">All Courses</h1>
+
+    <!-- ── Filter tabs ── -->
+    <div class="lc-tabs" id="lc-tabs">
+        <a href="?filter=all"
+           class="lc-tab {{#filter_all}}active{{/filter_all}}">All</a>
+        <a href="?filter=notstarted"
+           class="lc-tab {{#filter_notstarted}}active{{/filter_notstarted}}">Not Started</a>
+        <a href="?filter=ongoing"
+           class="lc-tab {{#filter_ongoing}}active{{/filter_ongoing}}">Ongoing</a>
+        <a href="?filter=completed"
+           class="lc-tab {{#filter_completed}}active{{/filter_completed}}">Completed</a>
+    </div>
+
+    <!-- ── Skeleton (shown while JS loads real data, hidden once ready) ── -->
+    <div class="lc-skeleton-grid" id="lc-skeleton">
+        {{#skeletons}}
+        <div class="lc-skeleton-card">
+            <div style="display:flex;justify-content:space-between;">
+                <div class="lc-skel lc-skel-title"></div>
+                <div class="lc-skel lc-skel-badge"></div>
+            </div>
+            <div class="lc-skel lc-skel-instr"></div>
+            <div class="lc-skel lc-skel-meta"></div>
+            <div class="lc-skel lc-skel-bar"></div>
+            <div class="lc-skel lc-skel-btn"></div>
+        </div>
+        {{/skeletons}}
+    </div>
+
+    <!-- ── Course grid (hidden until skeleton done) ── -->
+    <div class="lc-grid" id="lc-grid" style="display:none;">
+
+        {{#hascourses}}
+        {{#courses}}
+        <div class="lc-card">
+
+            <!-- Title + badge -->
+            <div class="lc-card-header">
+                <div class="lc-card-title">{{fullname}}</div>
+                <span class="lc-badge {{#filter_ongoing}}d-none{{/filter_ongoing}} {{#filter_completed}}d-none{{/filter_completed}} {{badgeclass}}">{{badgelabel}}</span>
+            </div>
+
+            <!-- Instructor -->
+            <div class="lc-instructor">Instructor : {{instructor}}</div>
+
+            <!-- Meta -->
+            <div class="lc-meta">
+                <div class="lc-meta-item">
+                    <i class="ti ti-layout-list"></i>
+                    {{lessoncount}} Lesson
+                </div>
+                <div class="lc-meta-item">
+                    <i class="ti ti-clock"></i>
+                    {{duration}}
+                </div>
+            </div>
+
+            <!-- Progress bar (only for ongoing) -->
+            {{#ongoing}}
+            <div class="lc-segments">
+                {{#segmentbars}}
+                <div class="lc-segment {{#filled}}filled-ongoing{{/filled}}"></div>
+                {{/segmentbars}}
+            </div>
+            <div class="lc-progress-row">
+                <span>Ongoing</span>
+                <span class="lc-progress-pct">{{progress}}%</span>
+            </div>
+            {{/ongoing}}
+
+            {{#completed}}
+            <div class="lc-segments">
+                {{#segmentbars}}
+                <div class="lc-segment {{#filled}}filled-completed{{/filled}}"></div>
+                {{/segmentbars}}
+            </div>
+            <div class="lc-progress-row">
+                <span>Completed</span>
+                <span class="lc-progress-pct">100%</span>
+            </div>
+            {{/completed}}
+
+            <!-- View button -->
+            <div style="margin-top:4px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <a href="{{viewurl}}" class="lc-btn-view">
+                    View
+                    <span class="btn-circle"><i class="ti ti-arrow-right"></i></span>
+                </a>
+
+                {{#completed}}
+                <button class="lc-btn-secondary"
+                        style="padding:8px 16px;font-size:13px;border-radius:50px;"
+                        onclick="lcOpenCompletion({{id}})">
+                    View Result
+                </button>
+                {{/completed}}
+            </div>
+
+        </div>
+        {{/courses}}
+        {{/hascourses}}
+
+        {{^hascourses}}
+        <div class="lc-empty" style="grid-column:1/-1;">
+            <i class="ti ti-books"></i>
+            No courses found for this filter.
+        </div>
+        {{/hascourses}}
+
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     COMPLETION POPUP — matches Figma Image 2
+     ══════════════════════════════════════════ -->
+<style>
+/* Override/extend popup styles to match Figma */
+.lc-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,0.50); z-index:9998;
+    align-items:center; justify-content:center;
+}
+.lc-overlay.open { display:flex; }
+
+.lc-completion-modal {
+    background:#fff; border-radius:20px;
+    padding:0; width:100%; max-width:420px;
+    position:relative; box-shadow:0 24px 64px rgba(0,0,0,.22);
+    animation:lc-modal-in .2s ease;
+    max-height:92vh; overflow-y:auto;
+}
+@keyframes lc-modal-in {
+    from{opacity:0;transform:translateY(20px)}
+    to{opacity:1;transform:translateY(0)}
+}
+
+/* Modal header bar */
+.lc-modal-header {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:18px 20px 14px;
+    border-bottom:1px solid #eef0f4;
+}
+.lc-modal-header-title { font-size:16px; font-weight:700; color:#1a2a4a; }
+.lc-modal-header-close {
+    width:30px; height:30px; border-radius:50%;
+    border:1px solid #e5e7eb; background:#fff;
+    cursor:pointer; font-size:15px; color:#555;
+    display:flex; align-items:center; justify-content:center;
+    line-height:1;
+}
+.lc-modal-header-close:hover { background:#f7f8fa; }
+
+/* Badge illustration area */
+.lc-badge-area {
+    text-align:center;
+    padding:28px 24px 16px;
+    position:relative;
+}
+
+/* Confetti dots */
+.lc-confetti-dot {
+    position:absolute; border-radius:50%;
+    animation:lc-confetti-fall 2s ease-in-out infinite;
+}
+@keyframes lc-confetti-fall {
+    0%,100%{ transform:translateY(0) rotate(0deg); opacity:.8; }
+    50%    { transform:translateY(8px) rotate(180deg); opacity:.4; }
+}
+
+/* Ribbon badge SVG */
+.lc-ribbon-svg { width:160px; height:160px; }
+
+/* Text area */
+.lc-popup-text-area { padding:0 24px 20px; text-align:center; }
+.lc-congrats-name {
+    font-size:22px; font-weight:800; color:#1a2a4a;
+    margin-bottom:8px; line-height:1.2;
+}
+.lc-congrats-desc {
+    font-size:13px; color:#666; line-height:1.6; margin-bottom:20px;
+}
+
+/* Score boxes */
+.lc-scores-row { display:flex; gap:12px; margin-bottom:20px; padding:0 24px; }
+.lc-score-card {
+    flex:1; border:1px solid #eef0f4; border-radius:14px;
+    padding:14px 10px; text-align:center; background:#fafbff;
+}
+.lc-score-card-label { font-size:13px; font-weight:600; color:#1a2a4a; margin-bottom:8px; }
+.lc-score-gauge { width:90px; height:55px; margin:0 auto 4px; display:block; }
+.lc-score-pct { font-size:22px; font-weight:700; }
+.lc-score-pct.teal   { color:#4db89a; }
+.lc-score-pct.orange { color:#e07b00; }
+
+/* Action buttons */
+.lc-popup-btns {
+    display:flex; gap:12px; padding:0 24px 24px;
+}
+.lc-popup-btn-outline {
+    flex:1; padding:13px 10px; border-radius:50px;
+    border:1px solid #e5e7eb; background:#fff;
+    font-size:13px; font-weight:500; color:#333;
+    cursor:pointer; text-align:center; transition:background .15s;
+    line-height:1.3;
+}
+.lc-popup-btn-outline:hover { background:#f7f8fa; }
+.lc-popup-btn-primary {
+    flex:1; padding:13px 10px; border-radius:50px;
+    border:none; background:#1a2a4a;
+    font-size:13px; font-weight:700; color:#fff;
+    cursor:pointer; text-align:center; transition:background .15s;
+    text-decoration:none; display:flex; align-items:center; justify-content:center;
+}
+.lc-popup-btn-primary:hover { background:#263660; color:#fff; }
+</style>
+
+<div class="lc-overlay" id="lc-completion-overlay">
+  <div class="lc-completion-modal" id="lc-completion-modal">
+
+    <!-- Header -->
+    <div class="lc-modal-header">
+        <span class="lc-modal-header-title">Course Completion</span>
+        <button class="lc-modal-header-close" onclick="lcCloseCompletion()">✕</button>
+    </div>
+
+    <!-- Badge illustration + confetti -->
+    <div class="lc-badge-area">
+        <!-- Confetti dots (matching Image 2) -->
+        <div class="lc-confetti-dot" style="width:8px;height:8px;background:#e74c3c;top:20px;left:60px;animation-delay:.1s;"></div>
+        <div class="lc-confetti-dot" style="width:6px;height:6px;background:#4db89a;top:30px;left:90px;animation-delay:.3s;"></div>
+        <div class="lc-confetti-dot" style="width:7px;height:7px;background:#e07b00;top:18px;right:80px;animation-delay:.5s;"></div>
+        <div class="lc-confetti-dot" style="width:5px;height:5px;background:#1a2a4a;top:40px;right:55px;animation-delay:.2s;"></div>
+        <div class="lc-confetti-dot" style="width:8px;height:8px;background:#e74c3c;bottom:20px;left:50px;animation-delay:.4s;"></div>
+        <div class="lc-confetti-dot" style="width:6px;height:6px;background:#4db89a;bottom:15px;right:60px;animation-delay:.6s;"></div>
+        <!-- Dash marks like Image 2 -->
+        <div style="position:absolute;top:28px;left:110px;width:18px;height:3px;background:#1a2a4a;border-radius:2px;opacity:.3;transform:rotate(-30deg);"></div>
+        <div style="position:absolute;top:50px;right:45px;width:14px;height:3px;background:#1a2a4a;border-radius:2px;opacity:.3;transform:rotate(20deg);"></div>
+        <div style="position:absolute;bottom:30px;left:70px;width:12px;height:3px;background:#e74c3c;border-radius:2px;opacity:.4;transform:rotate(-10deg);"></div>
+
+        <!-- Ribbon badge SVG — matches Image 2 exactly -->
+        <svg class="lc-ribbon-svg" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Papers behind shield -->
+            <rect x="38" y="52" width="38" height="50" rx="4" fill="#e8eaed" transform="rotate(-8 38 52)"/>
+            <rect x="84" y="52" width="38" height="50" rx="4" fill="#e8eaed" transform="rotate(8 84 52)"/>
+            <!-- Shield body -->
+            <path d="M80 28 L108 44 L108 76 Q108 104 80 116 Q52 104 52 76 L52 44 Z" fill="#1a2a4a"/>
+            <!-- Shield highlight -->
+            <path d="M80 35 L102 48 L102 76 Q102 98 80 108" stroke="rgba(255,255,255,0.1)" stroke-width="3" fill="none"/>
+            <!-- Star -->
+            <path d="M80 50 L84.5 63 L98 63 L87 71 L91 84 L80 76 L69 84 L73 71 L62 63 L75.5 63 Z"
+                  fill="#e74c3c"/>
+            <!-- Ribbon banner -->
+            <path d="M56 92 L104 92 L100 102 L104 112 L56 112 L60 102 Z" fill="#1a2a4a"/>
+            <text x="80" y="106" text-anchor="middle" font-size="8.5" font-weight="800"
+                  fill="#fff" font-family="Arial,sans-serif" letter-spacing="0.5">COMPLETED</text>
+        </svg>
+    </div>
+
+    <!-- Congratulations text -->
+    <div class="lc-popup-text-area">
+        <div class="lc-congrats-name" id="lc-congrats-name">Congratulations!</div>
+        <div class="lc-congrats-desc" id="lc-congrats-desc">
+            You've successfully completed the course. Your dedication and consistency helped you achieve outstanding results.
+        </div>
+    </div>
+
+    <!-- Score gauges -->
+    <div class="lc-scores-row">
+        <div class="lc-score-card">
+            <div class="lc-score-card-label">Final Score</div>
+            <svg class="lc-score-gauge" viewBox="0 0 90 55">
+                <path d="M10 50 A 35 35 0 0 1 80 50"
+                      stroke="#e5e7eb" stroke-width="9" fill="none" stroke-linecap="round"/>
+                <path id="lc-gauge-score" d="M10 50 A 35 35 0 0 1 80 50"
+                      stroke="#4db89a" stroke-width="9" fill="none" stroke-linecap="round"
+                      stroke-dasharray="110" stroke-dashoffset="33"
+                      style="transition:stroke-dashoffset .8s ease;"/>
+            </svg>
+            <div class="lc-score-pct teal" id="lc-final-score">92%</div>
+        </div>
+        <div class="lc-score-card">
+            <div class="lc-score-card-label">Quiz Accuracy</div>
+            <svg class="lc-score-gauge" viewBox="0 0 90 55">
+                <path d="M10 50 A 35 35 0 0 1 80 50"
+                      stroke="#e5e7eb" stroke-width="9" fill="none" stroke-linecap="round"/>
+                <path id="lc-gauge-quiz" d="M10 50 A 35 35 0 0 1 80 50"
+                      stroke="#e07b00" stroke-width="9" fill="none" stroke-linecap="round"
+                      stroke-dasharray="110" stroke-dashoffset="55"
+                      style="transition:stroke-dashoffset .8s ease;"/>
+            </svg>
+            <div class="lc-score-pct orange" id="lc-quiz-accuracy">75%</div>
+        </div>
+    </div>
+
+    <!-- Action buttons -->
+    <div class="lc-popup-btns">
+        <button class="lc-popup-btn-outline" onclick="lcOpenImprovement()">
+            Improvement Suggestion
+        </button>
+        <a href="#" class="lc-popup-btn-primary" id="lc-cert-link" target="_blank">
+            Download Certificate
+        </a>
+    </div>
+
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     IMPROVEMENT SUGGESTIONS POPUP
+     ══════════════════════════════════════════ -->
+<div class="lc-overlay" id="lc-improvement-overlay">
+    <div class="lc-modal">
+        <button class="lc-modal-close" onclick="lcCloseImprovement()">✕</button>
+        <div class="lc-modal-title">Performance Insights</div>
+        <div class="lc-suggestions-title">Improvement Suggestions</div>
+        <div class="lc-suggestion-grid" id="lc-suggestion-grid">
+            <!-- Filled by JS -->
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    'use strict';
+
+    // ── Show skeleton → then real grid after short delay ──
+    const skeleton = document.getElementById('lc-skeleton');
+    const grid     = document.getElementById('lc-grid');
+
+    // Simulate realistic async load (replace with actual fetch if needed)
+    setTimeout(function () {
+        skeleton.style.display = 'none';
+        grid.style.display     = 'grid';
+    }, 900);
+
+    // ── Track current course for popups ──
+    let currentCourseId = null;
+
+    // ── Completion popup ──
+    window.lcOpenCompletion = function (courseid) {
+        currentCourseId = courseid;
+
+        // Open modal immediately with skeleton state
+        document.getElementById('lc-completion-overlay').classList.add('open');
+        document.getElementById('lc-congrats-name').textContent    = 'Loading...';
+        document.getElementById('lc-congrats-desc').textContent    = '';
+        document.getElementById('lc-final-score').textContent      = '—';
+        document.getElementById('lc-quiz-accuracy').textContent    = '—';
+        document.getElementById('lc-gauge-score').setAttribute('stroke-dashoffset', 110);
+        document.getElementById('lc-gauge-quiz').setAttribute('stroke-dashoffset',  110);
+
+        require(['core/ajax'], function (Ajax) {
+            Ajax.call([{
+                methodname: 'local_courses_get_completion_popup',
+                args: { courseid: courseid },
+                done: function (data) {
+                    if (!data.success) return;
+
+                    // ── Personalised name — "Congratulations, Hasan!" ──
+                    document.getElementById('lc-congrats-name').textContent =
+                        'Congratulations, ' + data.firstname + '!';
+
+                    // ── Course-specific description ──
+                    document.getElementById('lc-congrats-desc').textContent =
+                        "You've successfully completed the " + data.coursename +
+                        " course. Your dedication and consistency helped you achieve outstanding results.";
+
+                    // ── Animate gauge arcs ──
+                    var scoreOffset = 110 - (110 * data.finalscore   / 100);
+                    var quizOffset  = 110 - (110 * data.quizaccuracy / 100);
+
+                    setTimeout(function () {
+                        document.getElementById('lc-gauge-score')
+                            .setAttribute('stroke-dashoffset', scoreOffset);
+                        document.getElementById('lc-gauge-quiz')
+                            .setAttribute('stroke-dashoffset', quizOffset);
+                    }, 80);
+
+                    // ── Update score text ──
+                    document.getElementById('lc-final-score').textContent   = data.finalscore   + '%';
+                    document.getElementById('lc-quiz-accuracy').textContent = data.quizaccuracy + '%';
+
+                    // ── Wire up Download Certificate button ──
+                    var certLink = document.getElementById('lc-cert-link');
+                    if (certLink && data.certurl) {
+                        certLink.href = data.certurl;
+                    }
+                },
+                fail: function () {
+                    // Fallback — still show popup with defaults
+                    document.getElementById('lc-congrats-name').textContent = 'Congratulations!';
+                    document.getElementById('lc-congrats-desc').textContent =
+                        "You've successfully completed the course. Your dedication and consistency helped you achieve outstanding results.";
+                    document.getElementById('lc-final-score').textContent   = 'N/A';
+                    document.getElementById('lc-quiz-accuracy').textContent = 'N/A';
+
+                    var certLink = document.getElementById('lc-cert-link');
+                    if (certLink) {
+                        certLink.href = M.cfg.wwwroot +
+                            '/local/courses/certificate.php?courseid=' + courseid;
+                    }
+                }
+            }]);
+        });
+    };
+
+    window.lcCloseCompletion = function () {
+        document.getElementById('lc-completion-overlay').classList.remove('open');
+    };
+
+    // ── Certificate download (kept for any direct calls) ──
+    window.lcDownloadCertificate = function () {
+        if (currentCourseId) {
+            window.open(M.cfg.wwwroot +
+                '/local/courses/certificate.php?courseid=' + currentCourseId);
+        }
+    };
+
+    // ── Improvement suggestions ──
+    window.lcOpenImprovement = function () {
+        lcCloseCompletion();
+
+        require(['core/ajax'], function (Ajax) {
+            Ajax.call([{
+                methodname: 'local_courses_get_improvement_suggestions',
+                args: { courseid: currentCourseId || 0 },
+                done: function (data) {
+                    var suggestions = JSON.parse(data.suggestions || '[]');
+                    var grid = document.getElementById('lc-suggestion-grid');
+                    grid.innerHTML = '';
+
+                    suggestions.forEach(function (s) {
+                        grid.innerHTML += '<div class="lc-suggestion-card">' +
+                            '<div class="lc-suggestion-header">' +
+                                '<div class="lc-suggestion-name">' + s.title + '</div>' +
+                                '<span class="lc-suggestion-tag ' + s.tagclass + '">' + s.tag + '</span>' +
+                            '</div>' +
+                            '<div class="lc-suggestion-desc">' + s.description + '</div>' +
+                        '</div>';
+                    });
+                },
+                fail: function () {
+                    // Fallback static
+                    document.getElementById('lc-suggestion-grid').innerHTML =
+                        '<div class="lc-suggestion-card">' +
+                            '<div class="lc-suggestion-header">' +
+                                '<div class="lc-suggestion-name">Improve Research Thinking</div>' +
+                                '<span class="lc-suggestion-tag tag-mastery">72% mastery</span>' +
+                            '</div>' +
+                            '<div class="lc-suggestion-desc">Spend more time validating problem statements and user behavior analysis.</div>' +
+                        '</div>' +
+                        '<div class="lc-suggestion-card">' +
+                            '<div class="lc-suggestion-header">' +
+                                '<div class="lc-suggestion-name">Increase Submission Speed</div>' +
+                                '<span class="lc-suggestion-tag tag-efficiency">Time efficiency</span>' +
+                            '</div>' +
+                            '<div class="lc-suggestion-desc">You performed strongly but took longer than average learners.</div>' +
+                        '</div>' +
+                        '<div class="lc-suggestion-card">' +
+                            '<div class="lc-suggestion-header">' +
+                                '<div class="lc-suggestion-name">Advanced UX Case Studies</div>' +
+                                '<span class="lc-suggestion-tag tag-recommended">Recommended</span>' +
+                            '</div>' +
+                            '<div class="lc-suggestion-desc">Recommended for stronger product strategy and execution skills.</div>' +
+                        '</div>';
+                }
+            }]);
+        });
+
+        document.getElementById('lc-improvement-overlay').classList.add('open');
+    };
+
+    window.lcCloseImprovement = function () {
+        document.getElementById('lc-improvement-overlay').classList.remove('open');
+    };
+
+    // ── Certificate download ──
+    window.lcDownloadCertificate = function () {
+        if (currentCourseId) {
+            window.open(M.cfg.wwwroot + '/local/courses/certificate.php?courseid=' + currentCourseId);
+        }
+    };
+
+    // Close overlays on outside click
+    document.getElementById('lc-completion-overlay').addEventListener('click', function (e) {
+        if (e.target === this) lcCloseCompletion();
+    });
+    document.getElementById('lc-improvement-overlay').addEventListener('click', function (e) {
+        if (e.target === this) lcCloseImprovement();
+    });
+
+    // Escape key closes
+    document.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { lcCloseCompletion(); lcCloseImprovement(); }
+    });
+
+}());
+</script>

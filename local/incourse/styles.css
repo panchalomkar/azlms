@@ -1,0 +1,9 @@
+#page-my-index .modal-dialog {
+     display: flex;
+    align-items: center;
+    min-height: calc(100% - 1rem);
+}
+
+.modal-open .modal {
+    z-index: 999999999999999999 !important;
+}

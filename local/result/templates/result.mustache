@@ -1,0 +1,572 @@
+{{!
+    @template local_result/result
+    Result page — GPA · Semester · Attendance · Externship · Timesheet
+}}
+<style>
+/* ═══════════════════════════════════════════════
+   RESULT PAGE — COMPLETE STYLESHEET
+   ═══════════════════════════════════════════════ */
+.lr-wrap { padding: 24px 28px; font-family: -apple-system, BlinkMacSystemFont,'Segoe UI',sans-serif; background:#f4f5f7; min-height:100vh; }
+
+/* ── Top bar ── */
+.lr-topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+.lr-page-title { font-size:22px; font-weight:700; color:#1a2a4a; }
+.lr-btn-pdf {
+    background:#1a2a4a; color:#fff; border:none; border-radius:50px;
+    padding:10px 22px; font-size:14px; font-weight:600; cursor:pointer;
+    text-decoration:none; transition:background .15s;
+    display:inline-flex; align-items:center; gap:8px;
+}
+.lr-btn-pdf:hover { background:#263660; color:#fff; }
+
+/* ── User selector ── */
+.lr-selector-wrap { margin-bottom:20px; display:flex; align-items:center; gap:10px; }
+.lr-selector-wrap select {
+    height:40px; border:1px solid #e5e7eb; border-radius:10px;
+    padding:0 12px; font-size:14px; background:#fff; color:#333; min-width:220px;
+}
+.lr-btn-add {
+    height:40px; width:40px; border-radius:10px; border:none;
+    background:#1a2a4a; color:#fff; font-size:20px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    transition:background .15s;
+}
+.lr-btn-add:hover { background:#263660; }
+
+/* ── Top 3-card row ── */
+.lr-top-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:16px; }
+
+/* Card base */
+.lr-card {
+    background:#fff; border-radius:16px; border:1px solid #eef0f4;
+    padding:20px; box-shadow:0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* ── GPA card ── */
+.lr-gpa-card { display:flex; align-items:center; gap:20px; }
+.lr-gpa-text .lr-gpa-label { font-size:13px; font-weight:500; color:#555; margin-bottom:4px; }
+.lr-gpa-value { font-size:32px; font-weight:700; color:#1a2a4a; line-height:1; }
+.lr-gpa-value span { font-size:16px; font-weight:400; color:#888; }
+.lr-gpa-delta {
+    display:inline-flex; align-items:center; gap:4px;
+    font-size:11px; color:#1faa6b; background:#eafaf3;
+    padding:3px 8px; border-radius:50px; margin-top:8px;
+}
+.lr-gpa-circle { flex-shrink:0; position:relative; }
+.lr-gpa-pct {
+    position:absolute; inset:0; display:flex; align-items:center;
+    justify-content:center; font-size:18px; font-weight:700; color:#4db89a;
+}
+
+/* ── Semester card ── */
+.lr-sem-card .lr-card-title { font-size:14px; font-weight:600; color:#1a2a4a; margin-bottom:14px; }
+.lr-sem-cols { display:flex; gap:10px; }
+.lr-sem-col {
+    flex:1; border:1px solid #e5e7eb; border-radius:10px;
+    padding:10px 8px; text-align:center;
+}
+.lr-sem-col .sem-label { font-size:11px; color:#8a8f98; margin-bottom:6px; }
+.lr-sem-col .sem-gpa   { font-size:20px; font-weight:700; color:#1a2a4a; }
+.lr-sem-col .sem-sub   { font-size:11px; color:#8a8f98; margin-top:2px; }
+
+/* ── Attendance card ── */
+.lr-att-card .lr-card-title { font-size:14px; font-weight:600; color:#1a2a4a; margin-bottom:14px; }
+.lr-att-value { font-size:32px; font-weight:700; color:#1faa6b; }
+.lr-att-label { font-size:13px; color:#555; margin-top:4px; }
+
+/* ── No-data placeholder (Image 3 style) ── */
+.lr-nodata {
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:center; padding:20px 10px; text-align:center;
+    color:#aaa; gap:8px;
+}
+.lr-nodata svg { opacity:.35; }
+.lr-nodata p { font-size:12px; margin:0; line-height:1.4; }
+
+/* ── Externship section ── */
+.lr-ext-card { margin-bottom:16px; }
+.lr-ext-header { display:flex; align-items:flex-start; justify-content:space-between; }
+.lr-ext-title { font-size:16px; font-weight:700; color:#1a2a4a; margin-bottom:4px; }
+.lr-ext-greeting { font-size:13px; color:#555; margin-bottom:14px; }
+.lr-ext-body { display:flex; gap:24px; align-items:flex-start; flex-wrap:wrap; }
+.lr-ext-left { flex:1; min-width:220px; }
+
+/* Hours bar */
+.lr-hours-row { display:flex; align-items:center; gap:8px; margin-bottom:10px; }
+.lr-hours-required {
+    display:flex; align-items:center; gap:8px;
+    font-size:13px; color:#333; padding:8px 16px;
+    border:1px solid #e5e7eb; border-radius:8px; margin-bottom:12px;
+}
+.lr-hours-required strong { font-size:15px; color:#1a2a4a; }
+.lr-legend { display:flex; gap:24px; flex-wrap:wrap; }
+.lr-legend-item { display:flex; align-items:center; gap:6px; font-size:13px; color:#555; }
+.lr-legend-dot { width:12px; height:12px; border-radius:50%; }
+.dot-orange { background:#e07b00; }
+.dot-blue   { background:#1a2a4a; }
+
+/* Donut chart */
+.lr-donut-wrap {
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:center; flex-shrink:0;
+}
+.lr-donut-label { font-size:12px; color:#555; margin-top:8px; text-align:center; }
+
+/* No-site placeholder */
+.lr-nosite {
+    display:flex; flex-direction:column; align-items:center;
+    justify-content:center; padding:40px 20px; color:#aaa; text-align:center; gap:10px;
+}
+.lr-nosite-icon {
+    width:64px; height:64px; border-radius:50%;
+    background:#f0f2f5; display:flex; align-items:center; justify-content:center;
+    font-size:28px; color:#ccc; position:relative;
+}
+.lr-nosite-icon::after {
+    content:'✕'; position:absolute; right:-4px; bottom:-4px;
+    width:22px; height:22px; background:#e5e7eb; border-radius:50%;
+    font-size:12px; display:flex; align-items:center; justify-content:center;
+    color:#999; border:2px solid #fff;
+    line-height:22px; text-align:center;
+}
+
+/* Externship detail rows */
+.lr-site-detail { display:flex; align-items:center; gap:8px; font-size:13px; color:#333; margin-bottom:8px; }
+.lr-site-detail i { font-size:16px; }
+.lr-site-detail strong { color:#1a2a4a; margin-right:4px; }
+
+/* SVG progress circle */
+.lr-progress-wrap { position:relative; display:inline-block; }
+.lr-progress-pct {
+    position:absolute; inset:0; display:flex; align-items:center;
+    justify-content:center; font-size:28px; font-weight:700; color:#1faa6b;
+}
+
+/* ── Timesheet section ── */
+.lr-ts-card { }
+.lr-ts-title { font-size:16px; font-weight:700; color:#1a2a4a; margin-bottom:16px; }
+
+.lr-table-wrap { overflow-x:auto; }
+.lr-table { width:100%; border-collapse:collapse; }
+.lr-table th {
+    font-size:13px; font-weight:600; color:#1a2a4a;
+    padding:10px 16px; text-align:left;
+    border-bottom:1px solid #eef0f4; white-space:nowrap;
+}
+.lr-table td {
+    font-size:13px; color:#444; padding:12px 16px;
+    border-bottom:1px solid #f4f5f7; white-space:nowrap;
+}
+.lr-table tr:last-child td { border-bottom:none; }
+.lr-table tr:hover td { background:#fafafa; }
+
+/* Status badge */
+.ts-status {
+    font-size:11px; font-weight:600; padding:3px 10px;
+    border-radius:50px; display:inline-block;
+}
+.ts-approved { color:#1faa6b; background:#eafaf3; }
+.ts-pending  { color:#e07b00; background:#fff4e0; }
+.ts-rejected { color:#e03c3c; background:#fff0f0; }
+
+/* Inline edit */
+.lr-edit-btn { cursor:pointer; color:#1a2a4a; margin-left:6px; opacity:.6; }
+.lr-edit-btn:hover { opacity:1; }
+.lr-edit-input {
+    width:60px; border:1px solid #1a2a4a; border-radius:6px;
+    padding:2px 6px; font-size:13px;
+}
+
+/* Action buttons */
+.lr-btn-approve, .lr-btn-reject {
+    font-size:12px; font-weight:600; border:none; border-radius:50px;
+    padding:4px 12px; cursor:pointer; transition:opacity .15s;
+}
+.lr-btn-approve { background:#eafaf3; color:#1faa6b; }
+.lr-btn-approve:hover { opacity:.8; }
+.lr-btn-reject  { background:#fff0f0; color:#e03c3c; }
+.lr-btn-reject:hover  { opacity:.8; }
+
+/* No-timesheet */
+.lr-no-ts { text-align:center; padding:32px 0; color:#aaa; font-size:13px; }
+
+/* ── Pagination ── */
+.lr-pagination-wrap {
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 16px 4px; flex-wrap:wrap; gap:10px;
+}
+.lr-pagination-info { font-size:12px; color:#888; }
+.lr-pagination { display:flex; align-items:center; gap:4px; }
+.lr-page-btn {
+    width:32px; height:32px; border-radius:8px;
+    border:1px solid #e5e7eb; background:#fff;
+    font-size:13px; color:#333; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+    text-decoration:none; transition:all .15s;
+}
+.lr-page-btn:hover { border-color:#1a2a4a; color:#1a2a4a; }
+.lr-page-btn.active { background:#1a2a4a; color:#fff; border-color:#1a2a4a; }
+.lr-page-btn.disabled { opacity:.4; pointer-events:none; }
+
+/* ══════════════════════════════════════════════
+   SKELETON LOADER
+   ══════════════════════════════════════════════ */
+@keyframes lr-shimmer {
+    0%   { background-position:-600px 0; }
+    100% { background-position: 600px 0; }
+}
+.lr-skel {
+    border-radius:8px;
+    background:linear-gradient(90deg,#e8eaed 25%,#f5f5f5 50%,#e8eaed 75%);
+    background-size:600px 100%;
+    animation:lr-shimmer 1.4s infinite linear;
+    display:block;
+}
+.lr-skeleton { }
+.sk-topbar { display:flex; justify-content:space-between; margin-bottom:20px; }
+.sk-topbar .lr-skel:first-child { height:28px; width:80px; }
+.sk-topbar .lr-skel:last-child  { height:36px; width:130px; border-radius:50px; }
+.sk-top-row { display:grid; grid-template-columns:1fr 1fr 1fr; gap:16px; margin-bottom:16px; }
+.sk-card { background:#fff; border-radius:16px; padding:20px; border:1px solid #eef0f4; }
+.sk-row { display:flex; align-items:center; gap:16px; }
+.sk-circle { width:90px; height:90px; border-radius:50%; flex-shrink:0; }
+.sk-lines { flex:1; display:flex; flex-direction:column; gap:8px; }
+.sk-line-lg { height:22px; width:70%; }
+.sk-line-md { height:16px; width:55%; }
+.sk-line-sm { height:12px; width:40%; border-radius:50px; }
+.sk-sem-cols { display:flex; gap:10px; margin-top:8px; }
+.sk-sem-col { flex:1; height:70px; border-radius:10px; }
+.sk-ext { background:#fff; border-radius:16px; padding:20px; border:1px solid #eef0f4; margin-bottom:16px; }
+.sk-ext-top { display:flex; gap:24px; }
+.sk-ext-left { flex:1; display:flex; flex-direction:column; gap:10px; }
+.sk-ext-right { width:160px; height:160px; border-radius:50%; flex-shrink:0; }
+.sk-table { background:#fff; border-radius:16px; padding:20px; border:1px solid #eef0f4; }
+.sk-table-title { height:22px; width:160px; margin-bottom:16px; }
+.sk-table-row { display:flex; gap:16px; margin-bottom:14px; }
+.sk-table-row .lr-skel { height:14px; flex:1; }
+.sk-pagination { height:16px; width:200px; margin-top:16px; border-radius:50px; }
+
+/* ══════════════════════════════════════════════
+   MODAL
+   ══════════════════════════════════════════════ */
+.lr-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(0,0,0,0.45); z-index:9998;
+    align-items:center; justify-content:center;
+}
+.lr-overlay.open { display:flex; }
+.lr-modal {
+    background:#fff; border-radius:16px; padding:24px;
+    width:100%; max-width:560px; position:relative;
+    box-shadow:0 20px 60px rgba(0,0,0,0.18);
+    max-height:90vh; overflow-y:auto;
+    animation:lr-modal-in .2s ease;
+}
+@keyframes lr-modal-in { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+.lr-modal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:20px; }
+.lr-modal-title  { font-size:16px; font-weight:700; color:#1a2a4a; }
+.lr-modal-close  {
+    width:30px; height:30px; border-radius:50%; border:1px solid #e5e7eb;
+    background:#fff; cursor:pointer; font-size:16px; color:#555;
+    display:flex; align-items:center; justify-content:center;
+}
+.lr-modal-close:hover { background:#f7f8fa; }
+.lr-form-group { margin-bottom:14px; }
+.lr-form-group label { font-size:13px; font-weight:500; color:#333; display:block; margin-bottom:5px; }
+.lr-form-control {
+    width:100%; height:40px; border:1px solid #e5e7eb; border-radius:8px;
+    padding:0 12px; font-size:14px; color:#333; box-sizing:border-box;
+}
+.lr-form-control:focus { outline:none; border-color:#1a2a4a; }
+textarea.lr-form-control { height:80px; padding:10px 12px; resize:vertical; }
+.lr-modal-footer { display:flex; justify-content:flex-end; gap:10px; margin-top:20px; }
+.lr-btn-save {
+    background:#1a2a4a; color:#fff; border:none; border-radius:50px;
+    padding:10px 24px; font-size:14px; font-weight:600; cursor:pointer;
+}
+.lr-btn-cancel {
+    background:#fff; color:#333; border:1px solid #e5e7eb; border-radius:50px;
+    padding:10px 24px; font-size:14px; cursor:pointer;
+}
+
+/* Nav tabs in modal */
+.lr-nav-tabs { display:flex; gap:4px; border-bottom:2px solid #eef0f4; margin-bottom:20px; }
+.lr-nav-tab {
+    padding:8px 18px; font-size:13px; font-weight:500; color:#888;
+    border:none; background:none; cursor:pointer; border-bottom:2px solid transparent;
+    margin-bottom:-2px; transition:all .15s;
+}
+.lr-nav-tab.active { color:#1a2a4a; border-bottom-color:#1a2a4a; font-weight:600; }
+.lr-tab-pane { display:none; }
+.lr-tab-pane.active { display:block; }
+
+@media(max-width:768px){
+    .lr-top-row { grid-template-columns:1fr; }
+    .sk-top-row { grid-template-columns:1fr; }
+    .lr-ext-body { flex-direction:column; }
+    .lr-wrap { padding:16px; }
+}
+</style>
+
+<div class="lr-wrap">
+
+  <!-- ── Skeleton (shown on first load) ── -->
+  <div id="lr-skeleton" class="lr-skeleton">
+    <div class="sk-topbar">
+      <div class="lr-skel"></div>
+      <div class="lr-skel"></div>
+    </div>
+    <div class="sk-top-row">
+      <!-- GPA skeleton -->
+      <div class="sk-card">
+        <div class="sk-row">
+          <div class="lr-skel sk-lines">
+            <div class="lr-skel sk-line-lg"></div>
+            <div class="lr-skel sk-line-md"></div>
+            <div class="lr-skel sk-line-sm"></div>
+          </div>
+          <div class="lr-skel sk-circle"></div>
+        </div>
+      </div>
+      <!-- Semester skeleton -->
+      <div class="sk-card">
+        <div class="lr-skel sk-line-md" style="width:55%;margin-bottom:12px;"></div>
+        <div class="sk-sem-cols">
+          <div class="lr-skel sk-sem-col"></div>
+          <div class="lr-skel sk-sem-col"></div>
+          <div class="lr-skel sk-sem-col"></div>
+        </div>
+      </div>
+      <!-- Attendance skeleton -->
+      <div class="sk-card">
+        <div class="lr-skel sk-line-md" style="width:60%;margin-bottom:16px;"></div>
+        <div class="lr-skel sk-line-lg" style="width:50%;margin-bottom:8px;"></div>
+        <div class="lr-skel sk-line-sm" style="width:40%;"></div>
+      </div>
+    </div>
+    <!-- Externship skeleton -->
+    <div class="sk-ext">
+      <div class="lr-skel sk-line-lg" style="width:160px;margin-bottom:8px;"></div>
+      <div class="lr-skel sk-line-md" style="width:80%;margin-bottom:16px;"></div>
+      <div class="sk-ext-top">
+        <div class="sk-ext-left">
+          <div class="lr-skel" style="height:36px;border-radius:8px;"></div>
+          <div class="lr-skel" style="height:14px;width:80%;"></div>
+          <div class="lr-skel" style="height:14px;width:70%;"></div>
+          <div class="lr-skel" style="height:14px;width:60%;"></div>
+        </div>
+        <div class="lr-skel sk-ext-right"></div>
+      </div>
+    </div>
+    <!-- Timesheet skeleton -->
+    <div class="sk-table">
+      <div class="lr-skel sk-table-title"></div>
+      {{#skrows}}<div class="sk-table-row">
+        <div class="lr-skel"></div><div class="lr-skel"></div>
+        <div class="lr-skel"></div><div class="lr-skel"></div>
+        <div class="lr-skel"></div>
+      </div>{{/skrows}}
+      <div class="lr-skel sk-pagination"></div>
+    </div>
+  </div>
+
+  <!-- ── Real content (hidden until skeleton done) ── -->
+  <div id="lr-content" style="display:none;">
+
+    <!-- Top bar -->
+    <div class="lr-topbar">
+      <div class="lr-page-title">Result</div>
+      <a href="{{pdf_url}}" class="lr-btn-pdf" target="_blank">
+        <i class="ti ti-download"></i> Download PDF
+      </a>
+    </div>
+
+    <!-- User selector (admin/manager only) -->
+    {{#show_selector}}
+    <div class="lr-selector-wrap">
+      <form method="get" id="lr-user-form" style="display:flex;gap:8px;align-items:center;">
+        <select name="userid" class="lr-form-control" style="width:240px;height:40px;"
+                onchange="document.getElementById('lr-user-form').submit()">
+          {{#user_options}}
+            <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+          {{/user_options}}
+        </select>
+        <button type="button" class="lr-btn-add" onclick="lrOpenModal()"
+                title="Add Entry">+</button>
+      </form>
+    </div>
+    {{/show_selector}}
+
+    <!-- ── Top 3 cards ── -->
+    <div class="lr-top-row">
+
+      <!-- GPA Card -->
+      <div class="lr-card">
+        <div class="lr-card-title" style="font-size:13px;font-weight:500;color:#555;margin-bottom:8px;">GPA/Score</div>
+        {{#has_gpa}}
+        <div class="lr-gpa-card">
+          <div class="lr-gpa-text">
+            <div class="lr-gpa-value">{{gpa_display}}<span>/4.0</span></div>
+            <div class="lr-gpa-delta">
+              <i class="ti ti-trending-up" style="font-size:12px;"></i>
+              0.3 from last semester
+            </div>
+          </div>
+          <div class="lr-gpa-circle">
+            <svg width="100" height="100" viewBox="0 0 120 120">
+              <circle cx="60" cy="60" r="54" stroke="#e5e7eb" stroke-width="10" fill="none"/>
+              <circle cx="60" cy="60" r="54"
+                stroke="#4db89a" stroke-width="10" fill="none"
+                stroke-linecap="round"
+                stroke-dasharray="{{gpa_circle_circ}}"
+                stroke-dashoffset="{{gpa_circle_offset}}"
+                transform="rotate(-90 60 60)"
+                style="transition:stroke-dashoffset 1s ease;"/>
+            </svg>
+            <div class="lr-gpa-pct">{{gpa_percent}}%</div>
+          </div>
+        </div>
+        {{/has_gpa}}
+        {{^has_gpa}}
+        <div class="lr-nodata">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+            <rect x="8" y="12" width="48" height="40" rx="4" fill="#e8eaed"/>
+            <rect x="16" y="20" width="32" height="4" rx="2" fill="#ccc"/>
+            <rect x="16" y="28" width="24" height="4" rx="2" fill="#ccc"/>
+            <rect x="16" y="36" width="20" height="4" rx="2" fill="#ccc"/>
+          </svg>
+          <p>No result yet. Complete your courses to see your score</p>
+        </div>
+        {{/has_gpa}}
+      </div>
+
+      <!-- Semester Overview -->
+      <div class="lr-card lr-sem-card">
+        <div class="lr-card-title">Semester Overview</div>
+        {{#has_semesters}}
+        <div class="lr-sem-cols">
+          {{#semesters}}
+          <div class="lr-sem-col">
+            <div class="sem-label">{{label}}</div>
+            {{#gpa}}<div class="sem-gpa">{{gpa}}</div>{{/gpa}}
+            {{^gpa}}<div class="sem-gpa" style="color:#ccc;">-</div>{{/gpa}}
+            <div class="sem-sub">GPA</div>
+          </div>
+          {{/semesters}}
+        </div>
+        {{/has_semesters}}
+        {{^has_semesters}}
+        <div class="lr-nodata">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+            <rect x="8" y="12" width="48" height="40" rx="4" fill="#e8eaed"/>
+            <rect x="16" y="20" width="32" height="4" rx="2" fill="#ccc"/>
+            <rect x="16" y="28" width="24" height="4" rx="2" fill="#ccc"/>
+          </svg>
+          <p>No semester data</p>
+        </div>
+        {{/has_semesters}}
+      </div>
+
+      <!-- Attendance Overview -->
+      <div class="lr-card lr-att-card">
+        <div class="lr-card-title">Attendance Overview</div>
+        {{#has_attendance}}
+        <div class="lr-att-value">{{att_display}}</div>
+        <div class="lr-att-label">Total Attendance</div>
+        {{/has_attendance}}
+        {{^has_attendance}}
+        <div class="lr-nodata">
+          <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+            <rect x="8" y="12" width="48" height="40" rx="4" fill="#e8eaed"/>
+            <rect x="16" y="20" width="32" height="4" rx="2" fill="#ccc"/>
+          </svg>
+          <p>No attendance data</p>
+        </div>
+        {{/has_attendance}}
+      </div>
+
+    </div><!-- /.lr-top-row -->
+
+  
+<script>
+(function(){
+  // ── Skeleton → content ──────────────────────────────────────────
+  setTimeout(function(){
+    document.getElementById('lr-skeleton').style.display = 'none';
+    document.getElementById('lr-content').style.display  = 'block';
+  }, 800);
+
+  // ── Modal ───────────────────────────────────────────────────────
+  window.lrOpenModal = function(){
+    document.getElementById('lr-modal-overlay').classList.add('open');
+  };
+  window.lrCloseModal = function(){
+    document.getElementById('lr-modal-overlay').classList.remove('open');
+  };
+  document.getElementById('lr-modal-overlay').addEventListener('click', function(e){
+    if(e.target === this) lrCloseModal();
+  });
+  document.addEventListener('keydown', function(e){
+    if(e.key === 'Escape') lrCloseModal();
+  });
+
+  // ── Tabs ────────────────────────────────────────────────────────
+  window.lrTab = function(btn, targetId){
+    // Deactivate all tabs/panes
+    btn.closest('.lr-modal').querySelectorAll('.lr-nav-tab').forEach(function(t){ t.classList.remove('active'); });
+    btn.closest('.lr-modal').querySelectorAll('.lr-tab-pane').forEach(function(p){ p.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById(targetId).classList.add('active');
+  };
+
+  // ── Inline edit attend hours ─────────────────────────────────────
+  window.lrEditHrs = function(id, current){
+    var span = document.getElementById('lr-hrs-'+id);
+    var input = document.createElement('input');
+    input.type='number'; input.step='0.01'; input.min=0;
+    input.value=current; input.className='lr-edit-input';
+    span.replaceWith(input);
+    input.focus();
+
+    function save(){
+      var val = parseFloat(input.value);
+      require(['core/ajax'], function(Ajax){
+        Ajax.call([{
+          methodname: 'local_result_update_attendhrs',
+          args: {id: id, attendhrs: val},
+          done: function(data){
+            var newSpan = document.createElement('span');
+            newSpan.id = 'lr-hrs-'+id;
+            newSpan.textContent = Math.round(val)+' Hrs';
+            input.replaceWith(newSpan);
+          },
+          fail: function(){ input.replaceWith(span); }
+        }]);
+      });
+    }
+    input.addEventListener('blur', save);
+    input.addEventListener('keydown', function(e){ if(e.key==='Enter') save(); });
+  };
+
+  // ── Approve / Reject ────────────────────────────────────────────
+  window.lrAction = function(id, status){
+    require(['core/ajax'], function(Ajax){
+      Ajax.call([{
+        methodname: 'local_result_timesheet_action',
+        args: {id: id, status: status},
+        done: function(data){
+          if(!data.success) return;
+          var el = document.getElementById('lr-status-'+id);
+          el.textContent = status;
+          el.className = 'ts-status ts-'+status.toLowerCase();
+          // Hide action buttons
+          var row = document.getElementById('lr-row-'+id);
+          var btns = row.querySelector('td:last-child');
+          if(btns) btns.innerHTML = '<span style="font-size:12px;color:#aaa;">Done</span>';
+        }
+      }]);
+    });
+  };
+
+}());
+</script>

@@ -1,0 +1,585 @@
+{{!
+    @template block_customdashboard/content
+    v4: course image in continue learning, "This week" dropdown filter,
+        corrected attendance, timezone-safe greeting.
+}}
+<style>
+/* ── Continue Learning: two-column body (text + image) ── */
+.custom-dashboard .continue-body {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+.custom-dashboard .continue-text-area {
+    flex: 1;
+    min-width: 0;
+}
+.custom-dashboard .continue-image-area {
+    flex-shrink: 0;
+    width: 130px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.custom-dashboard .course-thumb {
+    width: 130px;
+    height: 110px;
+    object-fit: cover;
+    border-radius: 14px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+.custom-dashboard .course-thumb-placeholder {
+    opacity: 0.85;
+}
+
+/* ── "This week" filter dropdown ── */
+.custom-dashboard .insight-filter-wrap {
+    position: relative;
+    display: inline-block;
+}
+.custom-dashboard .chart-tabs,.custom-dashboard .chart-tab.active {height: 40px;
+    align-items: center;display: flex; justify-content:center;}
+.custom-dashboard .insight-period-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    border: 1.5px solid #d1d5db;
+    border-radius: 999px;
+    padding: 0.3rem 0.9rem;
+    font-size: 0.82rem;
+    color: #374151;
+    background: #fff;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s;
+      height: 30px !important;
+  span{text-transform: capitalize !important;}
+}
+.custom-dashboard .insight-period-badge:hover {
+    border-color: #9ca3af;
+}
+.custom-dashboard .filter-chevron {
+    color: #6b7280;
+    transition: transform 0.2s;
+}
+.custom-dashboard .insight-filter-dropdown {
+    position: absolute;
+    top: calc(100% + 6px);
+    right: 0;
+    background: #fff;
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.10);
+    list-style: none;
+    margin: 0;
+    padding: 6px;
+    min-width: 140px;
+    z-index: 999;
+}
+.custom-dashboard .insight-filter-dropdown li {
+    padding: 0.5rem 0.9rem;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: #374151;
+    cursor: pointer;
+    transition: background 0.12s;
+}
+.custom-dashboard .insight-filter-dropdown li:hover {
+    background: #f3f4f6;
+}
+.custom-dashboard .insight-filter-dropdown li.selected {
+    background: #eef2ff;
+    color: #3457d5;
+    font-weight: 600;
+}
+@media (min-width: 992px) {
+    .chart-area .chart-image {
+        position: relative;
+        margin: auto;
+        height: 20vh;
+        width: 41vw !important;
+    }
+}
+.dashboard-stats-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 24px;
+    box-shadow: 0 4px 20px rgba(0,0,0,.06);
+}
+
+.dashboard-stats-card h3 {
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 4px;
+}
+
+.stats-subtitle {
+    color: #9ca3af;
+    font-size: 13px;
+    margin-bottom: 20px;
+}
+
+.chart-tabs {
+    background: #f3f4f6;
+    border-radius: 12px;
+    padding: 4px;
+    display: flex;
+    margin-bottom: 25px;
+}
+
+.chart-tab {
+    flex: 1;
+    border: 0;
+    background: transparent;
+    border-radius: 10px;
+    padding: 10px;
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+.chart-tab.active {
+    background: #1e3a78;
+    color: #fff;
+}
+p.chart-table-expand{display:none !important;}
+.insight-icon-wrap {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+</style>
+
+{{! ══════ SKELETON ══════ }}
+<div class="cd-skeleton" id="cd-skeleton" aria-hidden="true">
+    <div class="cd-sk-top-row">
+        <div class="cd-sk-card cd-sk-welcome">
+            <div class="cd-sk-line w60"></div>
+            <div class="cd-sk-line w40 mt8"></div>
+            <div class="cd-sk-box mt16"></div>
+            <div class="cd-sk-dots mt12">
+                <div class="cd-sk-dot"></div><div class="cd-sk-dot"></div>
+                <div class="cd-sk-dot"></div><div class="cd-sk-dot"></div>
+                <div class="cd-sk-dot"></div><div class="cd-sk-dot"></div>
+                <div class="cd-sk-dot"></div>
+            </div>
+        </div>
+        <div class="cd-sk-card cd-sk-continue">
+            <div class="cd-sk-line w30"></div>
+            <div class="cd-sk-line w80 mt8"></div>
+            <div class="cd-sk-line w50 mt4"></div>
+            <div class="cd-sk-progress mt16"></div>
+            <div class="cd-sk-btn mt16"></div>
+        </div>
+    </div>
+    <div class="cd-sk-section-title mt24">
+        <div class="cd-sk-line w20"></div>
+        <div class="cd-sk-pill"></div>
+    </div>
+    <div class="cd-sk-insights mt12">
+        <div class="cd-sk-card cd-sk-insight"><div class="cd-sk-circle"></div><div class="cd-sk-line w40 mt12"></div><div class="cd-sk-line w60 mt6"></div></div>
+        <div class="cd-sk-card cd-sk-insight"><div class="cd-sk-circle"></div><div class="cd-sk-line w40 mt12"></div><div class="cd-sk-line w60 mt6"></div></div>
+        <div class="cd-sk-card cd-sk-insight"><div class="cd-sk-circle"></div><div class="cd-sk-line w40 mt12"></div><div class="cd-sk-line w60 mt6"></div></div>
+        <div class="cd-sk-card cd-sk-insight"><div class="cd-sk-circle"></div><div class="cd-sk-line w40 mt12"></div><div class="cd-sk-line w60 mt6"></div></div>
+    </div>
+    <div class="cd-sk-bottom-row mt16">
+        <div class="cd-sk-card cd-sk-chart">
+            <div class="cd-sk-line w30"></div>
+            <div class="cd-sk-line w50 mt4"></div>
+            <div class="cd-sk-chart-bars mt20">
+                <div class="cd-sk-bar" style="height:40%"></div><div class="cd-sk-bar" style="height:65%"></div>
+                <div class="cd-sk-bar" style="height:50%"></div><div class="cd-sk-bar" style="height:90%"></div>
+                <div class="cd-sk-bar" style="height:55%"></div><div class="cd-sk-bar" style="height:30%"></div>
+                <div class="cd-sk-bar" style="height:15%"></div>
+            </div>
+        </div>
+        <div class="cd-sk-card cd-sk-sessions">
+            <div class="cd-sk-line w40"></div>
+            <div class="cd-sk-session-item mt16"><div class="cd-sk-square"></div><div class="cd-sk-session-lines"><div class="cd-sk-line w70"></div><div class="cd-sk-line w40 mt4"></div></div><div class="cd-sk-tag"></div></div>
+            <div class="cd-sk-session-item mt12"><div class="cd-sk-square"></div><div class="cd-sk-session-lines"><div class="cd-sk-line w70"></div><div class="cd-sk-line w40 mt4"></div></div><div class="cd-sk-tag"></div></div>
+            <div class="cd-sk-session-item mt12"><div class="cd-sk-square"></div><div class="cd-sk-session-lines"><div class="cd-sk-line w70"></div><div class="cd-sk-line w40 mt4"></div></div><div class="cd-sk-tag"></div></div>
+        </div>
+    </div>
+</div>
+
+{{! ══════ REAL CONTENT ══════ }}
+<div class="custom-dashboard" id="cd-content" style="display:none"
+     data-insights-weekly='{{{insights_weekly}}}'
+     data-insights-lastweek='{{{insights_lastweek}}}'
+     data-insights-monthly='{{{insights_monthly}}}'>
+
+    {{! ── Top row ── }}
+    <div class="dashboard-top-row">
+
+        {{! Welcome card }}
+        <div class="dashboard-welcome-card">
+            <h2 class="cd-greeting">{{greeting}}, <span class="user-name">{{username}}!</span></h2>
+            <p class="dashboard-subtitle">Keep up the momentum. You're doing great on your learning journey</p>
+
+            <div class="streak-box">
+                <div class="streak-fire">🔥</div>
+                <div class="streak-text">
+                    {{#hasstreak}}
+                        <strong>{{streak.current}} Days Streak</strong>
+                        <span>Keep it going!</span>
+                    {{/hasstreak}}
+                    {{^hasstreak}}
+                        <strong class="streak-inactive-title">No active streak</strong>
+                        <span>Start learning and keep a streak</span>
+                    {{/hasstreak}}
+                </div>
+            </div>
+
+            <div class="streak-dots">
+                {{#streak.days}}
+                <span class="streak-dot {{#completed}}completed{{/completed}}">
+                    {{#completed}}<svg viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 5L4.5 8.5L11 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>{{/completed}}
+                    {{^completed}}{{label}}{{/completed}}
+                </span>
+                {{/streak.days}}
+            </div>
+        </div>
+
+        {{! Continue Learning card }}
+        {{#hascontinue}}
+        <div class="dashboard-continue-card">
+            <span class="continue-label">Continue Learning</span>
+            <div class="continue-body">
+                <div class="continue-text-area">
+                    <h3 class="continue-title">{{continuelearning.coursename}}</h3>
+                    <p class="lesson-info">{{continuelearning.lessoninfo}}</p>
+                    <div class="progress-row">
+                        <div class="progress-bar-track">
+                            <div class="progress-bar-fill" style="width:{{continuelearning.progress}}%"></div>
+                        </div>
+                        <div class="progress-pct">
+                            <strong>{{continuelearning.progress}}%</strong><br>
+                            <small>Complete</small>
+                        </div>
+                    </div>
+                   <a href="{{continuelearning.courseurl}}" class="btn-continue">
+    Continue Learning
+
+    <span class="btn-arrow-circle">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <path d="M9 6L15 12L9 18"
+                  stroke="#1E3A78"
+                  stroke-width="2.5"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"/>
+        </svg>
+    </span>
+</a>
+                </div>
+                <div class="continue-image-area">
+                    {{#continuelearning.courseimage}}
+                        <img src="{{continuelearning.courseimage}}"
+                             alt="{{continuelearning.coursename}}"
+                             class="course-thumb">
+                    {{/continuelearning.courseimage}}
+                    {{^continuelearning.courseimage}}
+                        {{! SVG fallback when no image is set on the course }}
+                        <div class="course-thumb-placeholder">
+                            <svg viewBox="0 0 120 100" fill="none" xmlns="http://www.w3.org/2000/svg" width="110">
+                                <ellipse cx="60" cy="88" rx="50" ry="8" fill="#f0f0f0"/>
+                                <rect x="20" y="50" width="80" height="10" rx="4" fill="#c9b99a"/>
+                                <rect x="24" y="36" width="72" height="16" rx="4" fill="#e8d5b7"/>
+                                <rect x="28" y="24" width="64" height="14" rx="4" fill="#1e2a4a"/>
+                                <rect x="32" y="14" width="56" height="12" rx="4" fill="#3d5a99"/>
+                            </svg>
+                        </div>
+                    {{/continuelearning.courseimage}}
+                </div>
+            </div>
+        </div>
+        {{/hascontinue}}
+        {{^hascontinue}}
+        <div class="dashboard-continue-card continue-empty">
+            <span class="continue-label">Continue Learning</span>
+            <p class="continue-empty-msg">Enrol in a course to start learning!</p>
+            <a href="{{enrolurl}}" class="btn-continue">Browse Courses <span class="btn-arrow">›</span></a>
+        </div>
+        {{/hascontinue}}
+
+    </div>
+
+    {{! ── Key Insights header with working dropdown ── }}
+    <div class="dashboard-section-header">
+        <h3>Key Insights</h3>
+
+        {{! Dropdown trigger }}
+        <div class="insight-filter-wrap" id="insight-filter-wrap">
+            <button class="insight-period-badge" id="insight-filter-btn" type="button">
+                <span id="insight-filter-label">This week</span>
+                <svg class="filter-chevron" viewBox="0 0 10 6" fill="none" width="10">
+                    <path d="M1 1l4 4 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </button>
+            <ul class="insight-filter-dropdown" id="insight-filter-dropdown" style="display:none">
+                <li data-period="weekly">This week</li>
+                <li data-period="lastweek">Last week</li>
+                <li data-period="monthly">This month</li>
+            </ul>
+        </div>
+    </div>
+
+    {{! ── Insight cards — values swapped by JS on period change ── }}
+    <div class="insights-cards" id="insights-cards">
+        <div class="insight-card">
+          <div class="insight-icon-wrap icon-yellow">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M12 18C10.8 17.2 9.1 16.5 7 16.5C5.3 16.5 3.8 16.9 2.5 17.7V6.3C3.8 5.5 5.3 5 7 5C9.1 5 10.8 5.7 12 6.5M12 18C13.2 17.2 14.9 16.5 17 16.5C18.7 16.5 20.2 16.9 21.5 17.7V6.3C20.2 5.5 18.7 5 17 5C14.9 5 13.2 5.7 12 6.5M12 18V6.5"
+          stroke="#1F2937"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+</svg>
+</div>
+            <div class="insight-value" data-key="courses">{{#insights.courses}}{{insights.courses}}{{/insights.courses}}{{^insights.courses}}—{{/insights.courses}}</div>
+            <div class="insight-label">Courses enrolled</div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-icon-wrap icon-tan">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="12" r="7"
+            stroke="#1F2937"
+            stroke-width="1.8"/>
+    <path d="M12 8V12L15 14"
+          stroke="#1F2937"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+</svg>
+</div>
+            <div class="insight-value" data-key="hours">{{#insights.hours}}{{insights.hours}}{{/insights.hours}}{{^insights.hours}}—{{/insights.hours}}</div>
+            <div class="insight-label">Hours Learned</div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-icon-wrap icon-teal">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <rect x="5" y="6" width="14" height="13" rx="2"
+          stroke="#1F2937"
+          stroke-width="1.8"/>
+    <path d="M8 4V8M16 4V8"
+          stroke="#1F2937"
+          stroke-width="1.8"
+          stroke-linecap="round"/>
+</svg>
+</div>
+            <div class="insight-value" data-key="attendance">{{#insights.attendance}}{{insights.attendance}}{{/insights.attendance}}{{^insights.attendance}}—{{/insights.attendance}}</div>
+            <div class="insight-label">Attendance</div>
+        </div>
+        <div class="insight-card">
+            <div class="insight-icon-wrap icon-purple">
+<svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+    <circle cx="12" cy="10" r="5"
+            stroke="#FFFFFF"
+            stroke-width="1.8"/>
+    <path d="M10 15L8 20L12 18L16 20L14 15"
+          stroke="#FFFFFF"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"/>
+</svg>
+</div>
+            <div class="insight-value" data-key="quizscore">{{#insights.quizscore}}{{insights.quizscore}}{{/insights.quizscore}}{{^insights.quizscore}}—{{/insights.quizscore}}</div>
+            <div class="insight-label">Avg Quiz Score</div>
+        </div>
+    </div>
+
+    {{! ── Bottom row ── }}
+    <div class="dashboard-bottom-row">
+
+        {{! Learning Statistics }}
+        <div class="dashboard-stats-card">
+            <h3>Learning Statistics</h3>
+            <p class="stats-subtitle">Complete, incomplete and in progress courses</p>
+
+            <div class="chart-tabs">
+                <button class="chart-tab" data-period="lastweek">Daily</button>
+                <button class="chart-tab active" data-period="weekly">Weekly</button>
+                <button class="chart-tab" data-period="monthly">Monthly</button>
+            </div>
+
+            <div class="chart-panel" data-period="lastweek" style="display:none">
+                {{#chart_lastweek}}<div class="chart-area">{{{chart_lastweek}}}</div>{{/chart_lastweek}}
+                {{^chart_lastweek}}<div class="chart-empty"><div class="chart-empty-icon">⊙</div><p>No activity last week.</p></div>{{/chart_lastweek}}
+            </div>
+            <div class="chart-panel" data-period="weekly">
+                {{#chart_weekly}}<div class="chart-area">{{{chart_weekly}}}</div>{{/chart_weekly}}
+                {{^chart_weekly}}<div class="chart-empty"><div class="chart-empty-icon">⊙</div><p>Learning has not commenced yet.</p></div>{{/chart_weekly}}
+            </div>
+            <div class="chart-panel" data-period="monthly" style="display:none">
+                {{#chart_monthly}}<div class="chart-area">{{{chart_monthly}}}</div>{{/chart_monthly}}
+                {{^chart_monthly}}<div class="chart-empty"><div class="chart-empty-icon">⊙</div><p>No activity this month.</p></div>{{/chart_monthly}}
+            </div>
+        </div>
+
+        {{! Sessions List }}
+        <div class="dashboard-sessions-card">
+            <div class="sessions-header">
+                <h3>{{#hassessions}}Sessions List{{/hassessions}}{{^hassessions}}Course List{{/hassessions}}</h3>
+                <a href="{{viewallurl}}" class="sessions-viewall">View all</a>
+            </div>
+
+            {{#hassessions}}
+            <ul class="sessions-list">
+                {{#sessions}}
+                <li>
+                    <a href="{{url}}" class="session-link">
+                        <span class="session-icon">📘</span>
+                        <span class="session-info">
+                            <strong class="session-name">{{name}}</strong>
+                            <span class="session-due">Due date: {{duedate}}</span>
+                        </span>
+                        <span class="session-status {{statusclass}}">{{status}}</span>
+                    </a>
+                </li>
+                {{/sessions}}
+            </ul>
+            {{/hassessions}}
+            {{^hassessions}}
+            <div class="sessions-empty">
+                <div class="sessions-empty-icon">⊙</div>
+                <p>There are currently no active courses available.</p>
+            </div>
+            {{/hassessions}}
+        </div>
+
+    </div>
+</div>
+
+{{#js}}
+require(['jquery'], function($) {
+
+    // ── Skeleton → content ──────────────────────────────────────
+    setTimeout(function() {
+        $('#cd-skeleton').fadeOut(200, function() {
+            $('#cd-content').fadeIn(250);
+        });
+    }, 350);
+
+    // ── Chart tab toggle ────────────────────────────────────────
+    $(document).on('click', '.chart-tab', function() {
+        var period = $(this).data('period');
+        var card   = $(this).closest('.dashboard-stats-card');
+        card.find('.chart-tab').removeClass('active');
+        $(this).addClass('active');
+        card.find('.chart-panel').hide();
+        card.find('.chart-panel[data-period="' + period + '"]').show();
+    });
+
+    // ── "This week" period dropdown ─────────────────────────────
+    var $btn      = $('#insight-filter-btn');
+    var $dropdown = $('#insight-filter-dropdown');
+    var $label    = $('#insight-filter-label');
+    var $cards    = $('#cd-content');
+
+    // Read pre-rendered insight datasets from data attributes.
+    var datasets = {
+        weekly:   JSON.parse($cards.attr('data-insights-weekly')   || '{}'),
+        lastweek: JSON.parse($cards.attr('data-insights-lastweek') || '{}'),
+        monthly:  JSON.parse($cards.attr('data-insights-monthly')  || '{}'),
+    };
+
+    var labels = {
+        weekly:   'This week',
+        lastweek: 'Last week',
+        monthly:  'This month',
+    };
+
+    // Toggle dropdown open/close.
+    $btn.on('click', function(e) {
+        e.stopPropagation();
+        $dropdown.toggle();
+    });
+
+    // Close when clicking outside.
+    $(document).on('click', function() {
+        $dropdown.hide();
+    });
+
+    // Handle period selection.
+    $dropdown.on('click', 'li', function() {
+        var period = $(this).data('period');
+        var data   = datasets[period] || {};
+
+        // Update badge label.
+        $label.text(labels[period] || 'This week');
+        $dropdown.hide();
+
+        // Swap insight card values.
+        $('#insights-cards [data-key]').each(function() {
+            var key = $(this).data('key');
+            var val = data[key];
+            $(this).text(val !== null && val !== undefined && val !== '' ? val : '—');
+        });
+
+        // Mark selected item.
+        $dropdown.find('li').removeClass('selected');
+        $(this).addClass('selected');
+    });
+
+    // Mark default as selected.
+    $dropdown.find('li[data-period="weekly"]').addClass('selected');
+
+    // ── Style Moodle Charts ─────────────────────────────
+function styleCharts() {
+
+    if (typeof Chart === 'undefined') {
+        return;
+    }
+
+    $('.dashboard-stats-card canvas').each(function() {
+
+        var chart = Chart.getChart(this);
+
+        if (!chart || !chart.data || !chart.data.datasets) {
+            return;
+        }
+
+        var ctx = chart.ctx;
+
+        var gradient = ctx.createLinearGradient(0, 0, 0, 250);
+        gradient.addColorStop(0, '#0d6efd');
+        gradient.addColorStop(1, '#b9dcff');
+
+        chart.data.datasets.forEach(function(ds) {
+
+            ds.backgroundColor = gradient;
+            ds.borderColor = '#0d6efd';
+            ds.borderWidth = 0;
+
+            // Rounded bars.
+            ds.borderRadius = {
+                topLeft: 12,
+                topRight: 12,
+                bottomLeft: 0,
+                bottomRight: 0
+            };
+
+            ds.borderSkipped = false;
+        });
+chart.options.plugins.tooltip.backgroundColor = '#0d6efd';
+chart.options.plugins.tooltip.cornerRadius = 8;
+chart.options.plugins.tooltip.padding = 10;
+        // Hide legend.
+        if (chart.options.plugins && chart.options.plugins.legend) {
+            chart.options.plugins.legend.display = false;
+        }
+
+        chart.update();
+    });
+}
+
+// Moodle charts sometimes render late.
+setTimeout(styleCharts, 1000);
+setTimeout(styleCharts, 2000);
+setTimeout(styleCharts, 3000);
+});
+{{/js}}

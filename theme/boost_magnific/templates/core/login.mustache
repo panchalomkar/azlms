@@ -1,0 +1,169 @@
+{{!
+    @template core/login
+    Place at: theme/YOUR_THEME/templates/core/login.mustache
+}}
+<style>
+/*
+ * Extra scoped overrides for elements rendered by Boost Magnific's
+ * own auth renderer (the "Log in using your account on:" heading
+ * and "Is this your first time here?" section).
+ * These run AFTER the main stylesheet so they win.
+ */
+
+/* Kill the giant "Log in using your account on:" heading */
+.login-form-area .potentialidplist > p,
+.login-form-area > p,
+.card-block > p,
+.m-t-2,
+h6.m-t-2 {
+    font-size: 0.82rem !important;
+    font-weight: 500 !important;
+    color: #8a8f98 !important;
+    text-transform: none !important;
+    margin-bottom: 0.4rem !important;
+}
+
+/* Kill "Is this your first time here?" and signup card */
+.custom-signuppanel,
+.card + .card,
+.login-form-area .card:not(:first-child) { display: none !important; }
+
+/* Kill any loose h2/h3/h4 that Boost Magnific injects outside .custom-login */
+.login-form-area > h2,
+.login-form-area > h3,
+.login-form-area > h4,
+.form-content > h2,
+.form-items > h2 { display: none !important; }
+</style>
+
+{{#error}}
+    <div class="loginerrors mb-3">
+        <a href="#" id="loginerrormessage" class="accesshide">{{error}}</a>
+        <div class="alert alert-danger" role="alert">{{error}}</div>
+    </div>
+{{/error}}
+
+<div class="custom-login">
+
+    <h2>{{#str}} loginheader, theme_boost_magnific {{/str}}</h2>
+    <p class="login-subtitle">{{#str}} loginsubheader, theme_boost_magnific {{/str}}</p>
+
+    {{#cansignup}}
+        <div class="sr-only">
+            <a href="{{signupurl}}">{{#str}} tocreatenewaccount {{/str}}</a>
+        </div>
+    {{/cansignup}}
+
+    <form action="{{loginurl}}" method="post" id="login"
+          {{^passwordautocomplete}}autocomplete="off"{{/passwordautocomplete}}>
+
+        <input id="anchor" type="hidden" name="anchor" value="">
+        <script>document.getElementById('anchor').value = location.hash;</script>
+        <input type="hidden" name="logintoken" value="{{logintoken}}">
+
+        {{!-- Username --}}
+        <div class="form-fields">
+            <label for="username">
+                {{^canloginbyemail}}{{#str}}username{{/str}}{{/canloginbyemail}}
+                {{#canloginbyemail}}{{#str}}usernameemail{{/str}}{{/canloginbyemail}}
+            </label>
+            <div class="textbox-wrap">
+                <i class="fa fa-user" aria-hidden="true"></i>
+                <input type="text"
+                       name="username" id="username"
+                       class="form-control"
+                       value="{{username}}"
+                       placeholder={{#quote}}{{^canloginbyemail}}{{#str}}username{{/str}}{{/canloginbyemail}}{{#canloginbyemail}}{{#str}}usernameemail{{/str}}{{/canloginbyemail}}{{/quote}}>
+            </div>
+        </div>
+
+        {{!-- Password --}}
+        <div class="form-fields">
+            <label for="password">{{#str}}password{{/str}}</label>
+            <div class="textbox-wrap">
+                <i class="fa fa-lock" aria-hidden="true"></i>
+                <input type="password"
+                       name="password" id="password"
+                       value="" class="form-control"
+                       placeholder={{#quote}}{{#str}}password{{/str}}{{/quote}}
+                       {{^passwordautocomplete}}autocomplete="off"{{/passwordautocomplete}}>
+            </div>
+        </div>
+
+        {{!-- Remember + Forgot row --}}
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:0.25rem;margin-bottom:0.1rem;">
+            {{#rememberusername}}
+                <label style="display:flex;align-items:center;gap:6px;font-weight:400;font-size:0.82rem;color:#555;margin:0;">
+                    <input type="checkbox" name="rememberusername" id="rememberusername" value="1"
+                           {{#username}}checked="checked"{{/username}} />
+                    {{#str}} rememberusername, admin {{/str}}
+                </label>
+            {{/rememberusername}}
+            {{^rememberusername}}<span></span>{{/rememberusername}}
+            <a href="{{forgotpasswordurl}}" style="font-size:0.82rem;color:#1e2a4a;text-decoration:underline;">
+                {{#str}}forgotten{{/str}}
+            </a>
+        </div>
+
+        {{!-- Sign In --}}
+        <button type="submit" class="btn btn-primary btn-block" id="loginbtn">
+            {{#str}}login{{/str}}
+        </button>
+
+    </form>
+
+    {{!-- Identity providers: small styled, NOT giant Magnific headings --}}
+    {{#hasidentityproviders}}
+        <div style="margin-top:1.25rem;width:100%;">
+            <p style="text-align:center;font-size:0.78rem;color:#aaa;margin-bottom:0.5rem;text-transform:uppercase;letter-spacing:0.05em;">
+                {{#str}}potentialidps, auth{{/str}}
+            </p>
+            <div class="potentialidplist">
+                {{#identityproviders}}
+                    <div class="potentialidp" style="margin-bottom:0.5rem;">
+                        <a href="{{url}}" title={{#quote}}{{name}}{{/quote}}
+                           style="display:flex;align-items:center;justify-content:center;gap:8px;
+                                  border:1px solid #e5e7eb;border-radius:10px;height:44px;
+                                  font-size:0.9rem;font-weight:600;color:#333;background:#fff;
+                                  text-decoration:none;transition:background 0.15s;"
+                           onmouseover="this.style.background='#f7f8fa'"
+                           onmouseout="this.style.background='#fff'">
+                            {{#iconurl}}<img src="{{iconurl}}" alt="" width="20" height="20">{{/iconurl}}
+                            {{name}}
+                        </a>
+                    </div>
+                {{/identityproviders}}
+            </div>
+        </div>
+    {{/hasidentityproviders}}
+
+    {{!-- Guest login --}}
+    {{#canloginasguest}}
+        <div style="margin-top:0.75rem;width:100%;">
+            <form action="{{loginurl}}" method="post" id="guestlogin">
+                <input type="hidden" name="logintoken" value="{{logintoken}}">
+                <input type="hidden" name="username" value="guest">
+                <input type="hidden" name="password" value="guest">
+                <button class="btn btn-outline-secondary btn-block" type="submit">
+                    {{#str}}loginguest{{/str}}
+                </button>
+            </form>
+        </div>
+    {{/canloginasguest}}
+
+</div>{{!-- /.custom-login --}}
+
+{{! Signup panel intentionally omitted — removed by core_renderer.php override }}
+
+{{#js}}
+    require(['jquery', 'core/yui'], function($, Y) {
+    {{#error}}
+        $(function() { M.util.focus_login_error(Y); });
+    {{/error}}
+    {{^error}}
+        {{#autofocusform}}
+            $(function() { M.util.focus_login_form(Y); });
+        {{/autofocusform}}
+    {{/error}}
+    });
+{{/js}}

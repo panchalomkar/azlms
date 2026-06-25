@@ -1,0 +1,351 @@
+{{!
+    @template theme_boost/login
+    Login page template for Boost Magnific / Moodle 4.4
+    Place at: theme/YOUR_THEME/templates/theme_boost/login.mustache
+}}
+<style>
+/* ============================================================
+   HARD RESET — override every Moodle / Boost Magnific rule
+   ============================================================ */
+html, body {
+  height: 100% !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  overflow-x: hidden !important;
+}
+
+/* Kill Moodle's page chrome */
+#nav-drawer, .navbar, #page-header,
+#page-footer, footer, .footer-content-debugging,
+.drawertoggle, #theme_boost-drawers-primary,
+#theme_boost-drawers-secondary { display: none !important; }
+
+/* ── Page wrapper — full-viewport centering ── */
+#page-wrapper.login-wrapper {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 100vh !important;
+  width: 100% !important;
+  background: #f0f2f5 !important;
+  padding: 1rem !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+/* Kill any stray logo Moodle injects outside the card */
+#page-wrapper > .login-logo-area,
+#page-wrapper > .logo,
+#page-wrapper > a > .logo,
+#page-wrapper > a { display: none !important; }
+
+/* ── Two-panel card ── */
+.login-area {
+  display: flex !important;
+  flex-direction: row !important;
+  width: 100% !important;
+  max-width: 1100px !important;
+  min-height: 100% !important;
+  margin: 0 auto !important;
+  background: #ffffff !important;
+  border-radius: 20px !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 48px rgba(0,0,0,0.13) !important;
+  position: relative !important;
+  z-index: 10 !important;
+}
+
+/* ── LEFT panel — hero image ── */
+.login-background-area {
+  flex: 0 0 46% !important;
+  width: 46% !important;
+  background-size: cover !important;
+  background-position: center center !important;
+  display: flex !important;
+  align-items: flex-end !important;
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 20px !important;
+  min-height: 400px !important;
+}
+
+.login-background-area::after {
+  content: '' !important;
+  position: absolute !important;
+  inset: 0 !important;
+  background: linear-gradient(to bottom, transparent 45%, rgba(0,0,0,0.55) 100%) !important;
+  pointer-events: none !important;
+  z-index: 0 !important;
+}
+
+.login-color-area {
+  width: 100% !important;
+  padding: 1.75rem 2rem !important;
+  position: relative !important;
+  z-index: 2 !important;
+  display:none;
+}
+
+#login_login_description {
+  background: rgba(0,0,0,0.42) !important;
+  color: #fff !important;
+  padding: 1.1rem 1.35rem !important;
+  border-radius: 14px !important;
+  font-style: italic !important;
+  font-size: 1rem !important;
+  line-height: 1.6 !important;
+}
+
+#login_forgot_description,
+#login_signup_description { display: none !important; }
+
+/* ── RIGHT panel — form ── */
+.login-form-area {
+    position: unset !important;
+  flex: 1 1 0% !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 2.5rem 3rem !important;
+  background: #ffffff !important;
+  overflow-y: auto !important;
+  max-height: 100% !important;
+}
+
+/* ── Logo — inside right panel ── */
+.login-form-area .login-logo-area {
+  width: 100% !important;
+  max-width: 400px !important;
+  margin-bottom: 1.5rem !important;
+  text-align: center !important;
+  display: block !important;
+}
+.login-form-area .login-logo-area img,
+.login-form-area .login-logo-area .logo img,
+.login-form-area .login-logo-area .logo svg {
+  max-height: 70px !important;
+  max-width: 220px !important;
+  width: auto !important;
+  height: auto !important;
+  display: inline-block !important;
+}
+
+/* ── Form content wrapper ── */
+.form-content {
+  width: 100% !important;
+  max-width: 400px !important;
+}
+
+/* Heading */
+.custom-login h2 {
+  text-align: center !important;
+  font-size: 1.75rem !important;
+  font-weight: 800 !important;
+  color: #1a1a2e !important;
+  margin-bottom: 0.3rem !important;
+  line-height: 1.2 !important;
+}
+
+.login-subtitle {
+  text-align: center !important;
+  color: #8a8f98 !important;
+  font-size: 0.92rem !important;
+  margin-bottom: 1.75rem !important;
+  display: block !important;
+}
+.login-wrapper .login-area .login-form-area .form-content{padding:0!important; min-height: 80%!important;}
+/* Fields */
+.form-fields {
+  margin-bottom: 1rem !important;
+  width: 100% !important;
+}
+
+.form-fields label {
+  font-weight: 600 !important;
+  font-size: 0.88rem !important;
+  color: #333 !important;
+  margin-bottom: 0.4rem !important;
+  display: block !important;
+}
+
+.textbox-wrap { position: relative !important; }
+
+.textbox-wrap input.form-control {
+  width: 100% !important;
+  padding: 0 1rem 0 2.6rem !important;
+  border-radius: 10px !important;
+  background: #f7f8fa !important;
+  border: 1px solid #e5e7eb !important;
+  height: 50px !important;
+  font-size: 0.95rem !important;
+  color: #333 !important;
+  box-shadow: none !important;
+  display: block !important;
+}
+
+.textbox-wrap input.form-control:focus {
+  border-color: #1e2a4a !important;
+  outline: none !important;
+  background: #fff !important;
+  box-shadow: 0 0 0 3px rgba(30,42,74,0.08) !important;
+}
+
+.textbox-wrap i {
+  position: absolute !important;
+  left: 0.85rem !important;
+  top: 50% !important;
+  transform: translateY(-50%) !important;
+  color: #9aa0a6 !important;
+  font-size: 0.9rem !important;
+  pointer-events: none !important;
+}
+
+/* Sign In button */
+#loginbtn {
+  width: 100% !important;
+  border-radius: 999px !important;
+  height: 52px !important;
+  font-weight: 700 !important;
+  font-size: 1rem !important;
+  background: #1e2a4a !important;
+  border: none !important;
+  color: #fff !important;
+  margin-top: 0.5rem !important;
+  cursor: pointer !important;
+  display: block !important;
+  transition: background 0.2s !important;
+}
+#loginbtn:hover { background: #263660 !important; }
+
+/* Forgot password */
+.forgetpass {
+  text-align: right !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0 !important;
+}
+.forgetpass a {
+  font-size: 0.82rem !important;
+  color: #1e2a4a !important;
+  text-decoration: underline !important;
+}
+
+/* Remember username */
+.rememberpass {
+  margin-top: 0.75rem !important;
+  font-size: 0.85rem !important;
+  color: #555 !important;
+}
+
+/* Identity providers — tame Boost Magnific's giant heading */
+.potentialidplist { margin-top: 0.5rem !important; }
+.potentialidplist h6,
+.login-form-area h6 {
+  font-size: 0.85rem !important;
+  font-weight: 600 !important;
+  color: #8a8f98 !important;
+  text-align: center !important;
+  margin-bottom: 0.5rem !important;
+}
+.potentialidp a.btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  border-radius: 10px !important;
+  font-size: 0.9rem !important;
+  font-weight: 600 !important;
+  height: 44px !important;
+  border: 1px solid #e5e7eb !important;
+  color: #333 !important;
+  background: #fff !important;
+  margin-bottom: 0.5rem !important;
+}
+.potentialidp a.btn:hover { background: #f7f8fa !important; }
+
+/* COMPLETELY HIDE signup / first-time panel */
+.custom-signuppanel { display: none !important; }
+
+/* Error alerts */
+.loginerrors .alert-danger {
+  border-radius: 10px !important;
+  font-size: 0.9rem !important;
+}
+.login-form-area .login-logo-area img.logo-write{display:none!important;}
+/* ── Responsive ── */
+@media (max-width: 800px) {
+  .login-area {
+    flex-direction: column !important;
+    min-height: auto !important;
+    border-radius: 16px !important;
+  }
+  .login-background-area {
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    min-height: 220px !important;
+    border-radius: 16px 16px 0 0 !important;
+  }
+  .login-form-area { padding: 2rem 1.5rem !important; }
+}
+</style>
+
+{{> theme_boost/head}}
+<body data-templates="login" {{{bodyattributes}}}>
+
+<div id="page-wrapper" class="login-wrapper position-relative login_theme--{{{login_theme}}}">
+
+    {{{output.standard_top_of_body_html}}}
+
+    <div class="login-area">
+
+        {{!-- LEFT: hero image --}}
+        <div class="login-background-area" style="{{login_background_image}}">
+            <div class="login-color-area">
+                <div id="login_login_description">{{{login_login_description}}}</div>
+                <div id="login_forgot_description">{{{login_forgot_description}}}</div>
+                <div id="login_signup_description">{{{login_signup_description}}}</div>
+            </div>
+        </div>
+
+        {{!-- RIGHT: form panel --}}
+        <div class="login-form-area" style="">
+
+            {{!-- Logo centred at top of right panel --}}
+           
+<div class="login-logo-area" style="position:unset;">
+    <a href="{{{config.wwwroot}}}/?redirect=0">
+        <div class="logo">
+            {{{logourl_header}}}
+        </div>
+    </a>
+</div>
+            <div class="form-content">
+            
+                <div class="form-items">
+                    {{{output.course_content_header}}}
+                    {{{output.main_content}}}
+                    {{{output.course_content_footer}}}
+                </div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="footer-content-debugging" style="display:none!important">
+        <div class="container-fluid footer-dark-inner">
+            {{{output.standard_end_of_body_html}}}
+        </div>
+    </div>
+
+</div>
+
+{{#js}}
+    require(['theme_boost/footer-popover', 'theme_boost/drawer', 'theme_boost/loader'],
+        function(FooterPopover, Drawer, Loader) {
+            FooterPopover.init();
+            Drawer.init();
+            M.util.js_complete('theme_boost/loader');
+        });
+{{/js}}

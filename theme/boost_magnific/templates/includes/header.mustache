@@ -1,0 +1,62 @@
+{{!
+	This file is part of Moodle - http://moodle.org/
+
+	Moodle is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+
+	Moodle is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+
+	You should have received a copy of the GNU General Public License
+	along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+	Page header.
+}}
+
+{{{ output.custom_header }}}
+{{! navbar suppressed for non-admins — custom sidebar handles navigation }}
+
+
+
+{{> theme_boost/primary-drawer-mobile}}
+
+{{#js}}
+    require(['jquery'], function($) {
+        var top_scroll = Math.floor("{{top_scroll}}");
+        if (!top_scroll) {
+            var header = $("#header");
+            var page = $("#page");
+            $(window).on('scroll', window_scroll);
+            window_scroll();
+
+            function window_scroll() {
+
+                if ($(window).width() < 800) {
+                    header.removeClass("fixed-top");
+                    return;
+                }
+
+                var top = $(window).scrollTop();
+                if (top > 90 && !header.hasClass("fixed-top")) {
+                    header.addClass("fixed-top");
+
+                    page.css({
+                        "margin-top" : header.height() + 14
+                    });
+                }
+                if (top < 15 && header.hasClass("fixed-top")) {
+                    header.removeClass("fixed-top");
+
+                    page.css({
+                        "margin-top" : 14
+                    });
+                }
+            }
+        }
+    });
+{{/js}}

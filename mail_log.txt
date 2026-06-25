@@ -1,0 +1,115 @@
+Command line scripts must define CLI_SCRIPT before requiring config.php
+Command line scripts must define CLI_SCRIPT before requiring config.php
+Command line scripts must define CLI_SCRIPT before requiring config.php
+1757489161Found 1 users to email.
+Email to mohan.pal@akosmdtech.com: Sent
+1757489221Found 1 users to email.
+Email to mohan.pal@akosmdtech.com: Sent
+1757489281Found 1 users to email.
+Email to mohan.pal@akosmdtech.com: Sent
+1757489341Found 1 users to email.
+Email to mohan.pal@akosmdtech.com: Sent
+1757552401Found 0 users to email.
+1757638801Found 2 users to email.
+Email to rachel913.rw@gmail.com: Sent
+Email to mohanpal.25@gmail.com: Sent
+1757725201Found 0 users to email.
+1757811601Found 0 users to email.
+1757898001Found 0 users to email.
+1757984402Found 0 users to email.
+1758070802Found 1 users to email.
+1758157202Found 1 users to email.
+Email to thethunderaz@gmail.com: Sent
+1758243601Found 0 users to email.
+1758330001Found 0 users to email.
+1758416401Found 0 users to email.
+1758502801Found 0 users to email.
+1758589201Found 2 users to email.
+1758675601Found 1 users to email.
+Email to gaurangni750550@gmail.com: Sent
+1758762001Found 2 users to email.
+Email to test@gmail.com: Sent
+1758848401Found 1 users to email.
+Email to lmercado1986@gmail.com: Sent
+1758934801Found 0 users to email.
+1759021201Found 0 users to email.
+1759107601Found 4 users to email.
+Email to gaurangni.goyal@akosmdtech.com: Sent
+Email to gaurangni.goyal@akosmdtech.com: Sent
+1759194001Found 1 users to email.
+Email to user2@gmail.com: Sent
+1759280401Found 0 users to email.
+1759366801Found 1 users to email.
+1759453201Found 4 users to email.
+Email to angelsmail2025@gmail.com: Sent
+Email to reynaencizo@gmail.com: Sent
+Email to dontraehenderson1003@gmail.com: Sent
+Email to mariamkonjo@icloud.com: Sent
+1759539601Found 0 users to email.
+1759626001Found 0 users to email.
+1759712401Found 0 users to email.
+1759798801Found 1 users to email.
+Email to rachel@azschoolofmedicalassistant.com: Sent
+1759885201Found 1 users to email.
+1759971601Found 7 users to email.
+Email to sanchezalysa134@yahoo.com: Sent
+Email to luz567459@gmail.com: Sent
+Email to sadathompson@icloud.com: Sent
+Email to cross100719@hotmail.com: Sent
+Email to kuzzyempire@gmail.com: Sent
+Email to trymejusttryme3030@gmail.com: Sent
+Email to Kuzzyempire@gmail.com: Sent
+1760058001Found 0 users to email.
+1760144401Found 1 users to email.
+1760230801Found 0 users to email.
+1760317201Found 0 users to email.
+1760403601Found 1 users to email.
+1760490001Found 0 users to email.
+1760576401Found 0 users to email.
+1760662801Found 0 users to email.
+1760749201Found 0 users to email.
+1760835601Found 0 users to email.
+1760922001Found 0 users to email.
+1761008401Found 0 users to email.
+1761094801Found 1 users to email.
+1761181201Found 0 users to email.
+1761267601Found 0 users to email.
+1761354001Found 0 users to email.
+1761440401Found 0 users to email.
+1761526801Found 0 users to email.
+1761613201Found 0 users to email.
+1761699601Found 0 users to email.
+1761786001Found 0 users to email.
+1761872401Found 0 users to email.
+1761958801Found 0 users to email.
+1762045201Found 0 users to email.
+1762131601Found 0 users to email.
+1762218001Found 2 users to email.
+Email to amber.hardy0903@gmail.com: Sent
+1762304401Found 5 users to email.
+Email to gonzalesjammie2020@gmail.com: Sent
+Email to annie_r423@yahoo.com: Sent
+Email to jonathanmcclendon57@gmail.com: Sent
+1762390801Found 2 users to email.
+Email to rabinojames66@gmail.com: Sent
+Email to amber.hardy0903@gmail.com: Sent
+1762477201Found 0 users to email.
+1762563601Found 0 users to email.
+1762650001Found 1 users to email.
+1762736401Found 0 users to email.
+1762822801Found 0 users to email.
+1762909201Found 0 users to email.
+1762995601Found 0 users to email.
+1763082001Found 0 users to email.
+1763168401Found 0 users to email.
+1763254801Found 0 users to email.
+1763341201Found 0 users to email.
+1763427601Found 0 users to email.
+1763514001Found 0 users to email.
+1763600401Found 0 users to email.
+1763686801Found 0 users to email.
+1763773201Found 0 users to email.
+1763859602Found 0 users to email.
+1763946002Found 0 users to email.
+1764032402Found 0 users to email.
+1764118802Found 0 users to email.
